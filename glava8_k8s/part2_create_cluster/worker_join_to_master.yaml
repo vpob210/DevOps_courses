@@ -1,0 +1,7 @@
+- name: Join worker to master cluster
+  hosts: worker_nodes
+  become: true
+
+  tasks:
+    - name: Join
+      shell: sudo kubeadm join 192.168.66.191:6443 --token 1h2bml.aed1zakrwbxnsjh7 --discovery-token-ca-cert-hash sha256:4c67c2f05868e3e61fca358bfae0d56c7df42af513518bfa5a2e2bf66513bfb1 --cri-socket=unix:///run/cri-dockerd.sock

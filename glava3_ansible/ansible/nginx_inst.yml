@@ -1,0 +1,33 @@
+---
+
+- hosts:
+  - vm1
+  vars:
+  - siteslist:
+    - "www.test1.com"
+    - "www.test2.com"
+    - "www.test3.com"
+  tasks:
+  - name: Install nginx
+    apt:
+       pkg: nginx
+    become: yes
+  - name: Create dir for websites
+    file:
+       path: /var/www/{{ item }}
+       state: directory
+    become: yes
+    with_items: "{{ siteslist }}"
+  - name: Create nginx config files
+    template:
+       src: "website.j2"
+       dest: "/etc/nginx/sites-enabled/{{ item }}.conf"
+    with_items: "{{ siteslist }}"
+    become: yes
+    notify: nginxrestart
+  handlers:
+  - name: nginxrestart
+    service:
+       name: "nginx"
+       state: "restarted"
+    become: yes

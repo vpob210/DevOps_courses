@@ -1,0 +1,62 @@
+- name: Masters k8s config
+  hosts: masters
+  become: true
+
+  tasks:
+    - name: Cri install
+      shell: |
+        VER=$(curl -s https://api.github.com/repos/Mirantis/cri-dockerd/releases/latest|grep tag_name | cut -d '"' -f 4|sed 's/v//g') && echo $VER \
+         && wget https://github.com/Mirantis/cri-dockerd/releases/download/v${VER}/cri-dockerd-${VER}.amd64.tgz \
+         && tar xvf cri-dockerd-${VER}.amd64.tgz \
+         && mv cri-dockerd/cri-dockerd /usr/local/bin/ \
+         && cri-dockerd --version
+    
+    - name: Cri install stage 2
+      shell: |
+        wget https://raw.githubusercontent.com/Mirantis/cri-dockerd/master/packaging/systemd/cri-docker.service \ 
+        && wget https://raw.githubusercontent.com/Mirantis/cri-dockerd/master/packaging/systemd/cri-docker.socket \ 
+        && mv cri-docker.socket cri-docker.service /etc/systemd/system/ \ 
+        && sed -i -e 's,/usr/bin/cri-dockerd,/usr/local/bin/cri-dockerd,' /etc/systemd/system/cri-docker.service \ 
+        && systemctl daemon-reload \
+        && systemctl enable cri-docker.service \
+        && systemctl enable --now cri-docker.socket \
+        && systemctl restart docker && sudo systemctl restart cri-docker \
+        && systemctl status cri-docker.socket --no-pager
+    
+    - name: Create /etc/docker directory
+      file:
+        path: /etc/docker
+        state: directory
+        mode: '0755'
+
+    - name: Create daemon.json file
+      copy:
+        dest: /etc/docker/daemon.json
+        content: |
+          {
+            "exec-opts": ["native.cgroupdriver=systemd"],
+            "log-driver": "json-file",
+            "log-opts": {
+              "max-size": "100m"
+            },
+            "storage-driver": "overlay2"
+          }
+
+    - name: Restart Docker service
+      service:
+        name: docker
+        state: restarted
+
+    - name: Restart cri-docker service
+      service:
+        name: cri-docker
+        state: restarted
+
+    - name: Enable kubelet service
+      service:
+        name: kubelet
+        enabled: yes
+
+    - name: Display Cgroup output
+      debug:
+        var: cgroup_output.stdout_lines

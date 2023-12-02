@@ -1,0 +1,60 @@
+- name: Worker k8s config
+  hosts: worker_nodes
+  become: true
+
+  tasks:
+    - name: Update package lists, upgrade packages, and install packages
+      apt:
+        update_cache: yes
+        name:
+          - apt-transport-https
+          - curl
+    
+    - name: adding apt-key
+      shell: curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+    
+    - name: adding kube package list
+      shell: |
+        cat <<EOF | sudo tee /etc/apt/sources.list.d/kubernetes.list
+        deb https://apt.kubernetes.io/ kubernetes-xenial main
+        EOF
+    
+    - name: Update package lists
+      apt:
+        update_cache: yes
+    
+    - name: Install kube-let-adm-ctl
+      apt:
+        name:
+          # - kubelet 
+          - kubeadm 
+          - kubectl
+    
+    - name: hold kublet
+      shell: sudo apt-mark hold kubeadm kubectl
+
+    - name: adding apt-key docker
+      shell: sudo install -m 0755 -d /etc/apt/keyrings \
+             && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --yes --dearmor -o /etc/apt/keyrings/docker.gpg \
+             && sudo chmod a+r /etc/apt/keyrings/docker.gpg
+    
+    # - name: fingerprint
+    #   shell: apt-key fingerprint 0EBFCD88
+
+    - name: adding docker to package list
+      shell: |
+       echo \
+        "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+        "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+        sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    
+    - name: Update package lists
+      apt:
+        update_cache: yes
+    
+    - name: Install docker
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io

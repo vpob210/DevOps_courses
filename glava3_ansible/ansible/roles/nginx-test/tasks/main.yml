@@ -1,0 +1,76 @@
+---
+
+- name: For Deb
+  block: ### Debian ###
+
+    - name: Install nginx
+      apt:
+        pkg: nginx
+      become: yes
+    - name: Create dir for websites
+      file:
+        path: /var/www/{{ item }}
+        state: directory
+      become: yes
+      with_items: "{{ siteslist }}"
+    - name: Create nginx config files
+      template:
+        src: "website.j2"
+        dest: "/etc/nginx/sites-enabled/{{ item }}.conf"
+      with_items: "{{ siteslist }}"
+      become: yes
+      notify: nginxrestart
+    # - name: Add SSH public key
+      # authorized_key:
+      #   user: vpob
+      #   key: "{{ lookup('file', '/home/vpob/.ssh/ansible_vmDeb.pub') }}"
+      #   state: present
+  when: ansible_os_family == "Debian" or ansible_os_family == "Ubuntu"
+
+- name: For Centos
+  block: ### Centos ###
+    - name: Install EPEL
+      yum:
+        pkg: epel-release
+      become: yes
+    - name: Install nginx
+      yum:
+        pkg: nginx
+      become: yes
+    - name: Create dir for Web-sites
+      file:
+        path: /var/www/{{ item }}
+        state: directory
+      become: yes
+      with_items: "{{ siteslist }}"
+    - name: Create nginx config files
+      template:
+        src: "website.j2"
+        dest: "/etc/nginx/conf.d/{{ item }}.conf"
+      with_items: "{{ siteslist }}"
+      become: yes
+      notify: nginxrestart
+    # - name: Add SSH public key
+    #   authorized_key:
+    #     user: root
+    #     key: "{{ lookup('file', '/home/vpob/.ssh/ansible_vmCen.pub') }}"
+    #     state: present
+  when: ansible_os_family == "CentOS" or ansible_os_family == "RedHat"
+
+# - name: Add SSH keys to Deb
+#   block:
+#     - name: Deb ssh
+#       authorized_key:
+#         user: vpob
+#         key: "{{ lookup('file', '/home/vpob/.ssh/ansible_vmDeb.pub') }}"
+#         state: present
+#   when: "'vmDeb' in group_names"
+# - name: Add SSH keys to Cen
+#   block:
+#     - name: Cen ssh
+#       authorized_key:
+#         user: root
+#         key: "{{ lookup('file', '/home/vpob/.ssh/ansible_vmCen.pub') }}"
+#         state: present
+#   when: "'vmCen' in group_names"
+

@@ -1,0 +1,19 @@
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: {Сюда вставьте данные} # from /etc/kubernetes/admin.conf
+    server: {Сюда вставьте данные}
+  name: kubernetes
+contexts:
+- context:
+    cluster: kubernetes
+    user: tolik
+  name: tolik-context
+current-context: tolik-context
+kind: Config
+preferences: {}
+users:
+- name: tolik
+  user:
+    client-certificate: /home/tolik/.certs/tolik.crt
+    client-key: /home/tolik/.certs/tolik.key

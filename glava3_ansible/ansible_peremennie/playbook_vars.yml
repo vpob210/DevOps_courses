@@ -1,0 +1,8 @@
+- name: Configure webservers and databases
+  hosts: webserver,database
+  become: true
+
+  tasks:
+    - name: Configure Apache on webservers
+      debug:
+        msg: "Configuring Apache on {{ inventory_hostname }}. Port: {{ apache_port }}, Document root: {{ apache_docroot }}"

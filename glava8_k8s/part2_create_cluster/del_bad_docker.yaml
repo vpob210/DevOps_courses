@@ -1,0 +1,7 @@
+- name: Masters k8s config
+  hosts: masters
+  become: true
+
+  tasks:
+    - name: "del"
+      shell: rm -f /etc/apt/sources.list.d/docker.list

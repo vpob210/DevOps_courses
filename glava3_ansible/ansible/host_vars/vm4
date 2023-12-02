@@ -1,0 +1,9 @@
+ansible_ssh_host: 192.168.66.195
+ansible_ssh_user: root
+#ansible_ssh_pass: 123456
+#ansible_become_pass: 123456
+
+siteslist:
+- "www.test4.com"
+- "www.test42.com"
+- "www.test43.com"

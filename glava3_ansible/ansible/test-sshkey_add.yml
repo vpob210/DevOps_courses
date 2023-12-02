@@ -1,0 +1,46 @@
+---
+
+- name: Add ssh keys
+  hosts: all
+
+  tasks:
+  - block: ### add user ssh key ###
+      - name: Check for existed user
+        shell: getent passwd user
+        register: user_is_exist
+        ignore_errors: true
+      # when: "'vmDeb' in group_names"
+      - name: Add SSH public key for Debian hosts
+        authorized_key:
+          user: "{{ 'user' if user_is_exist.rc == 0 else 'vpob' }}"
+          key: "{{ lookup('file', '/home/vpob/.ssh/ansible_vmDeb.pub') }}"
+          state: present
+    when: "'vmDeb' in group_names"
+      
+  - name: Raw istalling python, check sudo
+    raw: which sudo
+    register: sudo_exist
+    ignore_errors: true
+      #failed_when: false  
+  - block: ### using Raw ###
+      - name: Inst python with sudo
+        become: true
+        ignore_errors: true
+        raw: sudo apt install -y python3
+      #  when: "'vmDeb' in group_names and sudo_exist.stdout != ''"
+      
+      - name: Inst python no sudo
+        command: apt install -y python3
+        become: true
+        become_method: su
+        register: nosu_inst
+        # when: "'vmDeb' in group_names and sudo_exist.stdout == ''"
+    when: "'vmDeb' in group_names and sudo_exist.stdout == ''"
+
+  - block: ### Centos add ssh ###
+    - name: Add SSH public key for Centos hosts
+      authorized_key:
+        user: root
+        key: "{{ lookup('file', '/home/vpob/.ssh/ansible_vmCen.pub') }}"
+        state: present
+    when: "'vmCen' in group_names"

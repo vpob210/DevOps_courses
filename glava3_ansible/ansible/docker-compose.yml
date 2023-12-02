@@ -1,0 +1,20 @@
+version: "3"
+services:
+        mysql:
+                image: mysql
+                ports:
+                        - 3306:3306
+                environment:
+                        - MYSQL_ROOT_PASSWORD=vecrek
+        nginx:
+                image: user1/nginxtest
+                ports:
+                        - 80:80
+                links:
+                        - php
+                volumes:
+                        - /home/ubuntu/dockertest/www:/var/www
+        php:
+                image: macedigital/phpfpm
+                volumes:
+                        - /home/ubuntu/dockertest/www:/var/www

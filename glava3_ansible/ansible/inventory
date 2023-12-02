@@ -1,0 +1,8 @@
+[vmDeb]
+vm1 private_key_file=/home/user/.ssh/user_ssh_key.pub
+vm2
+
+[vmCen]
+vm3
+vm4
+

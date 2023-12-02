@@ -1,0 +1,26 @@
+- name: Configure webserver and database
+  hosts: webserver, database
+  become: true
+
+  vars:
+    webserver_config:
+      document_root: "/var/www/html"
+      max_connections: 100
+
+    database_config:
+      username: "db_user"
+      password: "db_password"
+      port: 3306
+
+  tasks:
+    - name: Configure webserver
+      debug:
+        msg: "Configuring webserver with document root: {{ webserver_config.document_root }}, max connections: {{ webserver_config.max_connections }}"
+
+    - name: Configure database
+      debug:
+        msg: "Configuring database with username: {{ database_config.username }}, password: {{ database_config.password }}, port: {{ database_config.port }}"
+
+    - name: Configure Apache on webservers
+      debug:
+        msg: "Configuring Apache on {{ inventory_hostname }}. Port: {{ apache_port }}, Document root: {{ apache_docroot }}"
