@@ -1,9 +1,15 @@
 [masters]
 master1 ansible_host=192.168.66.191 ansible_user=testuser ansible_password=testuser ansible_become_password=testuser
-master2 ansible_host=192.168.66.192 ansible_user=testuser ansible_password=testuser ansible_become_password=testuser
-master3 ansible_host=192.168.66.193 ansible_user=testuser ansible_password=testuser ansible_become_password=testuser
+master2 ansible_host=192.168.66.192
+master3 ansible_host=192.168.66.193
 
 [worker_nodes]
-node1 ansible_host=192.168.66.194 ansible_user=testuser ansible_password=testuser ansible_become_password=testuser
-node2 ansible_host=192.168.66.195 ansible_user=testuser ansible_password=testuser ansible_become_password=testuser
-node3 ansible_host=192.168.66.196 ansible_user=testuser ansible_password=testuser ansible_become_password=testuser
+node1 ansible_host=192.168.66.194
+node2 ansible_host=192.168.66.195
+node3 ansible_host=192.168.66.196
+
+
+[all:vars]
+ansible_user=testuser
+ansible_password=testuser
+ansible_become_password=testuser
